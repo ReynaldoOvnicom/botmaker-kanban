@@ -12,365 +12,114 @@
       --border: #2e3250;
       --text: #e2e8f0;
       --text-muted: #8892b0;
-      --whatsapp: #25d366;
-      --whatsapp-dim: rgba(37,211,102,0.12);
-      --webchat: #3b9eff;
-      --webchat-dim: rgba(59,158,255,0.12);
-      --facebook: #1877f2;
-      --facebook-dim: rgba(24,119,242,0.12);
-      --instagram: #e1306c;
-      --instagram-dim: rgba(225,48,108,0.12);
-      --other: #9b59b6;
-      --other-dim: rgba(155,89,182,0.12);
       --radius: 10px;
       --card-radius: 8px;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ── CONFIG SCREEN ── */
-    #config-screen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
-    .config-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
-      width: 100%;
-      max-width: 420px;
-    }
-    .config-card h2 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .config-card p {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-    }
+    /* CONFIG SCREEN */
+    #config-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    .config-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; width: 100%; max-width: 420px; }
+    .config-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .config-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
     .form-group { margin-bottom: 16px; }
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      margin-bottom: 6px;
-    }
-    .form-group input, .form-group select {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 13px;
-      padding: 9px 12px;
-      outline: none;
-      transition: border-color .2s;
-    }
-    .form-group input:focus, .form-group select:focus { border-color: var(--webchat); }
+    .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .form-group input, .form-group select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; padding: 9px 12px; outline: none; transition: border-color .2s; }
+    .form-group input:focus, .form-group select:focus { border-color: #3b9eff; }
     .form-group select option { background: var(--surface2); }
-    .btn-primary {
-      width: 100%;
-      background: var(--webchat);
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 11px;
-      cursor: pointer;
-      transition: opacity .2s;
-    }
+    .btn-primary { width: 100%; background: #3b9eff; border: none; border-radius: 6px; color: #fff; font-size: 14px; font-weight: 600; padding: 11px; cursor: pointer; transition: opacity .2s; }
     .btn-primary:hover { opacity: .85; }
 
-    /* ── MAIN LAYOUT ── */
+    /* MAIN APP */
     #app { display: none; flex-direction: column; height: 100vh; }
 
-    .topbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    /* TOPBAR */
+    .topbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .topbar-title { font-size: 14px; font-weight: 600; flex: 1; }
-    .topbar-meta { font-size: 12px; color: var(--text-muted); }
-    .refresh-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-muted);
-      font-size: 12px;
-      padding: 5px 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: color .2s;
-    }
-    .refresh-btn:hover { color: var(--text); }
-    .refresh-btn.spinning svg { animation: spin .8s linear infinite; }
+    .topbar-meta { font-size: 11px; color: var(--text-muted); }
+    .countdown { font-size: 11px; color: var(--text-muted); min-width: 24px; text-align: right; }
+    .icon-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: 12px; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: color .2s; white-space: nowrap; }
+    .icon-btn:hover { color: var(--text); }
+    .icon-btn.spinning svg { animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .countdown {
-      font-size: 11px;
-      color: var(--text-muted);
-      min-width: 26px;
-      text-align: right;
-    }
-    .config-link {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 12px;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 4px;
-    }
-    .config-link:hover { color: var(--text); background: var(--surface2); }
 
-    /* ── FILTER BAR ── */
-    .filterbar {
-      display: flex;
-      gap: 8px;
-      padding: 8px 16px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-      overflow-x: auto;
-    }
-    .filter-chip {
-      font-size: 11px;
-      font-weight: 500;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all .15s;
-    }
+    /* FILTERBAR */
+    .filterbar { display: flex; gap: 8px; padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; align-items: center; }
+    .filter-chip { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all .15s; }
     .filter-chip.active { color: #fff; border-color: transparent; }
     .filter-chip[data-filter="all"].active { background: var(--surface2); color: var(--text); border-color: var(--border); }
-    .filter-chip[data-filter="whatsapp"].active { background: var(--whatsapp); }
-    .filter-chip[data-filter="webchat"].active { background: var(--webchat); }
-    .filter-chip[data-filter="facebook"].active { background: var(--facebook); }
-    .filter-chip[data-filter="instagram"].active { background: var(--instagram); }
+    .filter-chip[data-filter="whatsapp"].active { background: #25d366; }
+    .filter-chip[data-filter="webchat"].active { background: #3b9eff; }
+    .filter-chip[data-filter="facebook"].active { background: #1877f2; }
+    .filter-chip[data-filter="instagram"].active { background: #e1306c; }
+    .empty-toggle { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; margin-left: 4px; }
+    .empty-toggle input { accent-color: #3b9eff; }
 
-    /* ── KANBAN BOARD ── */
-    .board {
-      display: flex;
-      gap: 12px;
-      padding: 14px;
-      overflow-x: auto;
-      flex: 1;
-      align-items: flex-start;
-    }
+    /* TOTAL BAR */
+    .total-bar { padding: 5px 14px; font-size: 11px; color: var(--text-muted); background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .total-bar strong { color: var(--text); }
 
-    .column {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      width: 260px;
-      min-width: 260px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      max-height: calc(100vh - 140px);
-    }
+    /* ERROR BAR */
+    #error-bar { display: none; background: rgba(255,107,107,.1); border-bottom: 1px solid rgba(255,107,107,.3); color: #ff6b6b; font-size: 12px; padding: 7px 14px; }
 
-    .col-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--surface);
-      border-radius: var(--radius) var(--radius) 0 0;
-      flex-shrink: 0;
-    }
-    .col-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-    .col-title { font-size: 13px; font-weight: 600; flex: 1; }
-    .col-count {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 20px;
-      background: var(--surface2);
-      color: var(--text-muted);
-    }
+    /* BOARD */
+    .board { display: flex; gap: 12px; padding: 12px; overflow-x: auto; flex: 1; align-items: flex-start; }
 
-    .col-body {
-      overflow-y: auto;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-    }
-    .col-body::-webkit-scrollbar { width: 4px; }
-    .col-body::-webkit-scrollbar-track { background: transparent; }
+    /* COLUMN */
+    .column { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 260px; min-width: 260px; flex-shrink: 0; display: flex; flex-direction: column; max-height: calc(100vh - 130px); }
+    .col-header { display: flex; align-items: center; gap: 8px; padding: 11px 12px; border-bottom: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; flex-shrink: 0; }
+    .col-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .col-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .col-subtitle { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .col-count { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: var(--surface2); flex-shrink: 0; }
+    .col-body { overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+    .col-body::-webkit-scrollbar { width: 3px; }
     .col-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-    /* ── CHAT CARD ── */
-    .card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 11px 12px;
-      cursor: pointer;
-      transition: border-color .15s, transform .1s;
-      text-decoration: none;
-      display: block;
-    }
+    /* CARD */
+    .card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 10px 11px; cursor: pointer; transition: border-color .15s, transform .1s; text-decoration: none; display: block; }
     .card:hover { border-color: rgba(255,255,255,.2); transform: translateY(-1px); }
-
-    .card-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 7px;
-    }
-    .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      flex-shrink: 0;
-      color: #fff;
-    }
+    .card-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: #fff; }
     .card-info { flex: 1; min-width: 0; }
-    .card-name {
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-contact {
-      font-size: 11px;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-time {
-      font-size: 10px;
-      color: var(--text-muted);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .card-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-contact { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-time { font-size: 10px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
     .card-time.urgent { color: #ff6b6b; font-weight: 600; }
     .card-time.warning { color: #ffc107; }
-
-    .card-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 4px;
-    }
-    .badge {
-      font-size: 10px;
-      font-weight: 500;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--surface);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      white-space: nowrap;
-    }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 3px; }
+    .badge { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap; }
     .badge.queue { color: #a78bfa; border-color: rgba(167,139,250,.3); }
     .badge.agent { color: #34d399; border-color: rgba(52,211,153,.3); }
-    .badge.tag { color: var(--text-muted); }
+    .col-empty { text-align: center; padding: 28px 12px; color: var(--text-muted); font-size: 12px; }
 
-    .card-channel-name {
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 5px;
-    }
+    /* LOADING */
+    #loading-overlay { position: fixed; inset: 0; background: rgba(15,17,23,.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; gap: 12px; font-size: 13px; color: var(--text-muted); }
+    .loader { width: 26px; height: 26px; border: 2px solid var(--border); border-top-color: #3b9eff; border-radius: 50%; animation: spin .7s linear infinite; }
 
-    /* ── EMPTY / LOADING ── */
-    .col-empty {
-      text-align: center;
-      padding: 28px 12px;
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-    .col-empty svg { opacity: .3; margin-bottom: 8px; }
-
-    #loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15,17,23,.8);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      gap: 12px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .loader {
-      width: 28px;
-      height: 28px;
-      border: 2px solid var(--border);
-      border-top-color: var(--webchat);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-
-    #error-bar {
-      display: none;
-      background: rgba(255,107,107,.1);
-      border: 1px solid rgba(255,107,107,.3);
-      color: #ff6b6b;
-      font-size: 12px;
-      padding: 8px 16px;
-      text-align: center;
-    }
-
-    .total-bar {
-      padding: 6px 16px;
-      font-size: 11px;
-      color: var(--text-muted);
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-    .total-bar strong { color: var(--text); }
+    /* ALIASES MODAL */
+    #aliases-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    #aliases-modal.open { display: flex; }
+    .modal-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 540px; max-height: 80vh; display: flex; flex-direction: column; }
+    .modal-header { display: flex; align-items: center; padding: 15px 18px; border-bottom: 1px solid var(--border); gap: 10px; }
+    .modal-header h3 { font-size: 15px; font-weight: 600; flex: 1; }
+    .modal-header p { font-size: 12px; color: var(--text-muted); }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 9px; }
+    .alias-row { display: flex; align-items: center; gap: 9px; }
+    .alias-icon { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .alias-original { font-size: 11px; color: var(--text-muted); width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .alias-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; padding: 7px 10px; outline: none; transition: border-color .2s; }
+    .alias-input:focus { border-color: #3b9eff; }
+    .alias-status { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; }
+    .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+    .btn-secondary { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: 13px; font-weight: 500; padding: 8px 16px; cursor: pointer; }
+    .btn-secondary:hover { color: var(--text); }
+    .btn-save { background: #3b9eff; border: none; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; }
+    .btn-save:hover { opacity: .85; }
+    .btn-save:disabled { opacity: .5; cursor: default; }
   </style>
 </head>
 <body>
@@ -378,8 +127,8 @@
 <!-- CONFIG SCREEN -->
 <div id="config-screen">
   <div class="config-card">
-    <h2>🤖 Kanban Conversaciones</h2>
-    <p>Ingresa tu Access Token de Botmaker para comenzar. Se guarda en memoria de la sesión.</p>
+    <h2>📊 Kanban Conversaciones</h2>
+    <p>Ingresa tu Access Token de Botmaker. Se mantiene en memoria de la sesión.</p>
     <div class="form-group">
       <label>Access Token</label>
       <input type="password" id="input-token" placeholder="eyJhbGciOiJ..." />
@@ -401,57 +150,81 @@
 <div id="app">
   <div id="loading-overlay">
     <div class="loader"></div>
-    <span id="loading-text">Cargando canales y conversaciones…</span>
+    <span id="loading-text">Cargando…</span>
   </div>
 
   <div class="topbar">
     <span class="topbar-title">📊 Kanban · Conversaciones por Canal</span>
     <span class="topbar-meta" id="last-updated"></span>
     <span class="countdown" id="countdown-display"></span>
-    <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
-      <svg id="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <polyline points="23 4 23 10 17 10"></polyline>
-        <polyline points="1 20 1 14 7 14"></polyline>
+    <button class="icon-btn" id="refresh-btn" onclick="refreshData()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline>
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
       </svg>
       Actualizar
     </button>
-    <button class="config-link" onclick="showConfig()">⚙</button>
+    <button class="icon-btn" onclick="openAliases()" title="Renombrar canales">✏️ Aliases</button>
+    <button class="icon-btn" onclick="showConfig()">⚙</button>
   </div>
 
   <div id="error-bar"></div>
 
-  <div class="filterbar" id="filterbar">
+  <div class="filterbar">
     <button class="filter-chip active" data-filter="all" onclick="setFilter('all')">Todos</button>
     <button class="filter-chip" data-filter="whatsapp" onclick="setFilter('whatsapp')">📱 WhatsApp</button>
     <button class="filter-chip" data-filter="webchat" onclick="setFilter('webchat')">💬 Webchat</button>
     <button class="filter-chip" data-filter="facebook" onclick="setFilter('facebook')">📘 Facebook</button>
     <button class="filter-chip" data-filter="instagram" onclick="setFilter('instagram')">📷 Instagram</button>
-    <label class="filter-chip" style="cursor:pointer; user-select:none;">
-      <input type="checkbox" id="show-empty" onchange="renderBoard()" style="margin-right:4px; accent-color:#3b9eff;">
-      Ver canales vacíos
+    <label class="empty-toggle">
+      <input type="checkbox" id="show-empty" onchange="renderBoard()"> Ver canales vacíos
     </label>
   </div>
 
   <div class="total-bar" id="total-bar"></div>
-
   <div class="board" id="board"></div>
 </div>
 
+<!-- ALIASES MODAL -->
+<div id="aliases-modal">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <div style="flex:1">
+        <h3>✏️ Nombres de canales</h3>
+        <p>Los nombres se guardan en Botmaker vía PATCH /channels/{id}</p>
+      </div>
+      <button class="modal-close" onclick="closeAliases()">×</button>
+    </div>
+    <div class="modal-body" id="aliases-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeAliases()">Cancelar</button>
+      <button class="btn-save" id="save-btn" onclick="saveAliases()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
+// ── CONSTANTS ──────────────────────────────────────────────────────────────────
 const API_BASE = 'https://api.botmaker.com/v2.0';
-const REFRESH_INTERVAL = 60; // seconds
+const REFRESH_SEC = 60;
+
+const PLATFORMS = {
+  whatsapp:  { label: 'WhatsApp',  icon: '📱', color: '#25d366', dim: 'rgba(37,211,102,.15)'  },
+  webchat:   { label: 'Webchat',   icon: '💬', color: '#3b9eff', dim: 'rgba(59,158,255,.15)'  },
+  facebook:  { label: 'Facebook',  icon: '📘', color: '#1877f2', dim: 'rgba(24,119,242,.15)'  },
+  instagram: { label: 'Instagram', icon: '📷', color: '#e1306c', dim: 'rgba(225,48,108,.15)'  },
+  other:     { label: 'Otros',     icon: '🔗', color: '#9b59b6', dim: 'rgba(155,89,182,.15)'  },
+};
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
 let token = '';
 let daysBack = 7;
 let allChats = [];
-let channelMap = {}; // channelId → channel obj
-let agentMap = {};   // agentId → name
+let channelMap = {};   // channelId → channel object (with .name, .number, .platform)
 let activeFilter = 'all';
 let countdownTimer = null;
-let countdownValue = REFRESH_INTERVAL;
 
-// Read token from URL param if present
+// Auto-start from URL param
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('token')) {
   token = urlParams.get('token');
@@ -461,77 +234,51 @@ if (urlParams.get('token')) {
   loadData();
 }
 
-// ─── PLATFORM UTILS ───────────────────────────────────────────────────────────
-const PLATFORMS = {
-  whatsapp: {
-    label: 'WhatsApp',
-    icon: '📱',
-    color: '#25d366',
-    dim: 'rgba(37,211,102,0.12)',
-    bg: '#1a3327'
-  },
-  webchat: {
-    label: 'Webchat',
-    icon: '💬',
-    color: '#3b9eff',
-    dim: 'rgba(59,158,255,0.12)',
-    bg: '#1a2a3f'
-  },
-  facebook: {
-    label: 'Facebook',
-    icon: '📘',
-    color: '#1877f2',
-    dim: 'rgba(24,119,242,0.12)',
-    bg: '#1a2440'
-  },
-  instagram: {
-    label: 'Instagram',
-    icon: '📷',
-    color: '#e1306c',
-    dim: 'rgba(225,48,108,0.12)',
-    bg: '#3a1a28'
-  },
-  other: {
-    label: 'Otros',
-    icon: '🔗',
-    color: '#9b59b6',
-    dim: 'rgba(155,89,182,0.12)',
-    bg: '#271a3a'
-  }
-};
-
+// ── HELPERS ────────────────────────────────────────────────────────────────────
 function getPlatform(channelId) {
   if (!channelId) return 'other';
   const id = channelId.toLowerCase();
-  if (id.includes('-whatsapp-')) return 'whatsapp';
-  if (id.includes('-webchat-')) return 'webchat';
+  if (id.includes('-whatsapp-'))  return 'whatsapp';
+  if (id.includes('-webchat-'))   return 'webchat';
   if (id.includes('-facebook-') || id.includes('-messenger-')) return 'facebook';
   if (id.includes('-instagram-')) return 'instagram';
   return 'other';
 }
 
+// Raw identifier shown as subtitle / placeholder
+function getRawLabel(ch) {
+  if (!ch) return '';
+  if (ch.number) return `+${ch.number}`;
+  return ch.id || '';
+}
+
+// Display label — prefers .name set in Botmaker
+function getDisplayLabel(ch) {
+  if (!ch) return 'Canal desconocido';
+  if (ch.name && ch.name.trim()) return ch.name.trim();
+  return getRawLabel(ch) || ch.id || 'Sin nombre';
+}
+
 function getInitials(first, last) {
-  const f = (first || '').trim();
-  const l = (last || '').trim();
-  if (!f && !l) return '?';
-  return ((f[0] || '') + (l[0] || '')).toUpperCase() || f[0].toUpperCase();
+  const a = (first || '').trim()[0] || '';
+  const b = (last  || '').trim()[0] || '';
+  return (a + b).toUpperCase() || '?';
 }
 
 function timeSince(dateStr) {
   if (!dateStr) return null;
   const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-  if (diff < 60) return { label: `${diff}s`, urgent: diff > 300 };
-  if (diff < 3600) { const m = Math.floor(diff/60); return { label: `${m}m`, urgent: m > 30, warning: m > 10 }; }
-  if (diff < 86400) { const h = Math.floor(diff/3600); return { label: `${h}h`, urgent: h > 4, warning: h > 1 }; }
-  const d = Math.floor(diff/86400);
-  return { label: `${d}d`, urgent: false };
+  if (diff < 60)   return { label: `${diff}s`,              urgent: diff > 300 };
+  if (diff < 3600) { const m = Math.floor(diff/60);  return { label: `${m}m`, urgent: m > 30, warning: m > 10 }; }
+  if (diff < 86400){ const h = Math.floor(diff/3600); return { label: `${h}h`, urgent: h > 4,  warning: h > 1  }; }
+  return { label: `${Math.floor(diff/86400)}d`, urgent: false };
 }
 
-function formatLastUpdated() {
-  return new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ─── APP START ────────────────────────────────────────────────────────────────
+// ── APP FLOW ───────────────────────────────────────────────────────────────────
 function startApp() {
   const t = document.getElementById('input-token').value.trim();
   if (!t) { alert('Ingresa un Access Token válido.'); return; }
@@ -548,38 +295,24 @@ function showConfig() {
   document.getElementById('config-screen').style.display = 'flex';
 }
 
-// ─── DATA LOADING ─────────────────────────────────────────────────────────────
+// ── DATA ───────────────────────────────────────────────────────────────────────
 async function loadData() {
   showLoading(true);
   showError(null);
-
   try {
-    // Fetch channels
     setLoadingText('Cargando canales…');
     const chRes = await apiFetch('/channels');
     channelMap = {};
     (chRes.items || []).forEach(c => { channelMap[c.id] = c; });
 
-    // Fetch agents
-    setLoadingText('Cargando agentes…');
-    try {
-      const agRes = await apiFetch('/operators');
-      agentMap = {};
-      (agRes.items || []).forEach(a => {
-        agentMap[a.id] = a.name || a.email || a.id;
-      });
-    } catch(e) { /* agents are optional */ }
-
-    // Fetch chats
     setLoadingText('Cargando conversaciones…');
     const from = new Date();
     from.setDate(from.getDate() - daysBack);
     const chatRes = await apiFetch(`/chats?from=${from.toISOString()}`);
     allChats = chatRes.items || [];
 
-    // Paginate if needed
     let nextPage = chatRes.nextPage;
-    while (nextPage && allChats.length < 500) {
+    while (nextPage && allChats.length < 1000) {
       setLoadingText(`Cargando más… (${allChats.length})`);
       const next = await apiFetchUrl(nextPage);
       allChats = allChats.concat(next.items || []);
@@ -587,11 +320,10 @@ async function loadData() {
     }
 
     renderBoard();
-    document.getElementById('last-updated').textContent = `Actualizado: ${formatLastUpdated()}`;
+    document.getElementById('last-updated').textContent = `Actualizado: ${new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}`;
     startCountdown();
-
   } catch(err) {
-    showError(`Error al cargar datos: ${err.message}`);
+    showError(`Error: ${err.message}`);
   } finally {
     showLoading(false);
   }
@@ -604,37 +336,25 @@ async function refreshData() {
   document.getElementById('refresh-btn').classList.remove('spinning');
 }
 
-// ─── API HELPERS ──────────────────────────────────────────────────────────────
 async function apiFetch(path) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'access-token': token, 'Content-Type': 'application/json' }
-  });
+  const res = await fetch(`${API_BASE}${path}`, { headers: { 'access-token': token } });
   if (!res.ok) throw new Error(`HTTP ${res.status} en ${path}`);
   return res.json();
 }
 
 async function apiFetchUrl(url) {
-  const res = await fetch(url, {
-    headers: { 'access-token': token, 'Content-Type': 'application/json' }
-  });
+  const res = await fetch(url, { headers: { 'access-token': token } });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
-// ─── RENDER ───────────────────────────────────────────────────────────────────
-function getChannelLabel(ch) {
-  if (!ch) return 'Canal desconocido';
-  if (ch.name) return ch.name;
-  if (ch.number) return `+${ch.number}`;
-  return ch.id || 'Sin nombre';
-}
-
+// ── BOARD ──────────────────────────────────────────────────────────────────────
 function renderBoard() {
   const board = document.getElementById('board');
   board.innerHTML = '';
   const showEmpty = document.getElementById('show-empty')?.checked;
 
-  // Build map: channelId → chats[]
+  // Group chats by channelId
   const chatsByChannel = {};
   allChats.forEach(chat => {
     const cid = chat.chat?.channelId || '__unknown__';
@@ -642,74 +362,50 @@ function renderBoard() {
     chatsByChannel[cid].push(chat);
   });
 
-  // Determine which channels to show
-  // Start from channelMap (all known channels) + any channelId found in chats
-  const allChannelIds = new Set([
-    ...Object.keys(channelMap),
-    ...Object.keys(chatsByChannel)
-  ]);
+  // All channel IDs: known from API + any found in chat data
+  const allIds = new Set([...Object.keys(channelMap), ...Object.keys(chatsByChannel)]);
 
-  // Filter by active platform filter
-  let channelsToShow = [...allChannelIds].filter(cid => {
-    const plat = getPlatform(cid);
-    return activeFilter === 'all' || plat === activeFilter;
-  });
+  // Filter by platform
+  let ids = [...allIds].filter(cid => activeFilter === 'all' || getPlatform(cid) === activeFilter);
 
-  // Hide empty if checkbox is off
-  if (!showEmpty) {
-    channelsToShow = channelsToShow.filter(cid => (chatsByChannel[cid] || []).length > 0);
-  }
+  // Optionally hide empty
+  if (!showEmpty) ids = ids.filter(cid => (chatsByChannel[cid] || []).length > 0);
 
-  // Sort channels: by platform order, then by name
+  // Sort: platform order, then display label
   const platOrder = ['whatsapp', 'facebook', 'instagram', 'webchat', 'other'];
-  channelsToShow.sort((a, b) => {
-    const pa = platOrder.indexOf(getPlatform(a));
-    const pb = platOrder.indexOf(getPlatform(b));
-    if (pa !== pb) return pa - pb;
-    const na = getChannelLabel(channelMap[a] || { id: a });
-    const nb = getChannelLabel(channelMap[b] || { id: b });
-    return na.localeCompare(nb);
+  ids.sort((a, b) => {
+    const diff = platOrder.indexOf(getPlatform(a)) - platOrder.indexOf(getPlatform(b));
+    if (diff !== 0) return diff;
+    return getDisplayLabel(channelMap[a]).localeCompare(getDisplayLabel(channelMap[b]));
   });
 
   // Total bar
-  const filteredChats = allChats.filter(c =>
-    activeFilter === 'all' || getPlatform(c.chat?.channelId) === activeFilter
-  );
-  const total = filteredChats.length;
-
-  // Count by platform for summary
-  const platCounts = {};
-  filteredChats.forEach(c => {
-    const p = getPlatform(c.chat?.channelId);
-    platCounts[p] = (platCounts[p] || 0) + 1;
-  });
-  const platSummary = Object.entries(platCounts)
-    .map(([p, n]) => `${PLATFORMS[p]?.icon || '🔗'} ${PLATFORMS[p]?.label || p}: <strong>${n}</strong>`)
-    .join(' &nbsp;·&nbsp; ');
-
+  const visibleChats = allChats.filter(c => activeFilter === 'all' || getPlatform(c.chat?.channelId) === activeFilter);
+  const counts = {};
+  visibleChats.forEach(c => { const p = getPlatform(c.chat?.channelId); counts[p] = (counts[p]||0)+1; });
+  const summary = Object.entries(counts).map(([p,n]) => `${PLATFORMS[p]?.icon||'🔗'} ${PLATFORMS[p]?.label||p}: <strong>${n}</strong>`).join(' · ');
   document.getElementById('total-bar').innerHTML =
-    `<strong>${total}</strong> conversación${total !== 1 ? 'es' : ''} · <strong>${channelsToShow.length}</strong> canal${channelsToShow.length !== 1 ? 'es' : ''}` +
-    (platSummary ? `&nbsp;&nbsp; ${platSummary}` : '');
+    `<strong>${visibleChats.length}</strong> conversaciones · <strong>${ids.length}</strong> canales &nbsp; ${summary}`;
 
-  if (channelsToShow.length === 0) {
-    board.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:32px;">Sin canales con conversaciones en el período seleccionado.</div>`;
+  if (ids.length === 0) {
+    board.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:32px;">Sin conversaciones en el período seleccionado.</div>`;
     return;
   }
 
-  channelsToShow.forEach(cid => {
-    const chats = chatsByChannel[cid] || [];
-    const channel = channelMap[cid] || { id: cid, platform: getPlatform(cid) };
-    board.appendChild(buildColumn(channel, chats));
+  ids.forEach(cid => {
+    const ch = channelMap[cid] || { id: cid, platform: getPlatform(cid) };
+    board.appendChild(buildColumn(ch, chatsByChannel[cid] || []));
   });
 }
 
-function buildColumn(channel, chats) {
-  const plat = channel.platform || getPlatform(channel.id || '');
-  const cfg = PLATFORMS[plat] || PLATFORMS.other;
-  const colLabel = getChannelLabel(channel);
-  const safeId = (channel.id || 'unknown').replace(/[^a-z0-9]/gi, '_');
+function buildColumn(ch, chats) {
+  const plat = ch.platform || getPlatform(ch.id || '');
+  const cfg  = PLATFORMS[plat] || PLATFORMS.other;
+  const displayLabel = getDisplayLabel(ch);
+  const rawLabel     = getRawLabel(ch);
+  const subtitle     = (displayLabel !== rawLabel && rawLabel) ? `${rawLabel} · ${cfg.label}` : cfg.label;
+  const safeId       = (ch.id || 'unknown').replace(/[^a-z0-9]/gi, '_');
 
-  // Sort: most recent last message first
   chats.sort((a, b) => {
     const da = new Date(a.lastUserMessageDatetime || a.lastSessionCreationTime || a.creationTime || 0);
     const db = new Date(b.lastUserMessageDatetime || b.lastSessionCreationTime || b.creationTime || 0);
@@ -718,149 +414,156 @@ function buildColumn(channel, chats) {
 
   const col = document.createElement('div');
   col.className = 'column';
-
   col.innerHTML = `
-    <div class="col-header" title="${escHtml(channel.id || '')}">
-      <div class="col-icon" style="background:${cfg.dim}; color:${cfg.color}; font-size:16px;">
-        ${cfg.icon}
-      </div>
+    <div class="col-header" title="${escHtml(ch.id||'')}">
+      <div class="col-icon" style="background:${cfg.dim};color:${cfg.color};">${cfg.icon}</div>
       <div style="flex:1;min-width:0;">
-        <div class="col-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(colLabel)}</div>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">${cfg.label}</div>
+        <div class="col-title">${escHtml(displayLabel)}</div>
+        <div class="col-subtitle">${escHtml(subtitle)}</div>
       </div>
       <span class="col-count" style="color:${cfg.color}">${chats.length}</span>
     </div>
-    <div class="col-body" id="col-body-${safeId}"></div>
-  `;
+    <div class="col-body" id="cb_${safeId}"></div>`;
 
-  const body = col.querySelector(`#col-body-${safeId}`);
-
+  const body = col.querySelector(`#cb_${safeId}`);
   if (chats.length === 0) {
-    body.innerHTML = `
-      <div class="col-empty">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-        <div>Sin conversaciones</div>
-      </div>`;
+    body.innerHTML = `<div class="col-empty">💬<br>Sin conversaciones</div>`;
   } else {
-    chats.forEach(chat => {
-      body.appendChild(buildCard(chat, cfg));
-    });
+    chats.forEach(chat => body.appendChild(buildCard(chat, cfg)));
   }
-
   return col;
 }
 
 function buildCard(chat, cfg) {
   const first = chat.firstName || '';
-  const last = chat.lastName || '';
-  const name = [first, last].filter(Boolean).join(' ') || chat.chat?.contactId || 'Sin nombre';
+  const last  = chat.lastName  || '';
+  const name  = [first,last].filter(Boolean).join(' ') || chat.chat?.contactId || 'Sin nombre';
   const contactId = chat.chat?.contactId || '';
-  const chatId = chat.chat?.chatId || '';
-  const channelId = chat.chat?.channelId || '';
-
-  const ts = timeSince(chat.lastUserMessageDatetime || chat.lastSessionCreationTime);
-  const agentName = chat.agentId ? (agentMap[chat.agentId] || chat.agentId) : null;
+  const chatId    = chat.chat?.chatId    || '';
+  const ts    = timeSince(chat.lastUserMessageDatetime || chat.lastSessionCreationTime);
   const queue = chat.queueId || null;
-  const tags = (chat.tags || []).slice(0, 3);
-
-  // Channel name — shown only if card is in an "unknown" column
-  const chObj = channelMap[channelId];
-  const chName = null; // now shown in column header, not per card
-
-  const url = chatId ? `https://go.botmaker.com/#/chats/${chatId}` : '#';
-
-  const initials = getInitials(first, last);
-  const avatarColor = cfg.dim;
-  const avatarTextColor = cfg.color;
+  const tags  = (chat.tags || []).slice(0, 2);
 
   const card = document.createElement('a');
   card.className = 'card';
-  card.href = url;
+  card.href = chatId ? `https://go.botmaker.com/#/chats/${chatId}` : '#';
   card.target = '_blank';
   card.rel = 'noopener';
 
-  let timeHtml = '';
-  if (ts) {
-    const cls = ts.urgent ? 'urgent' : (ts.warning ? 'warning' : '');
-    timeHtml = `<span class="card-time ${cls}">${ts.label}</span>`;
-  }
+  const timeClass = ts?.urgent ? 'urgent' : (ts?.warning ? 'warning' : '');
+  const timeHtml  = ts ? `<span class="card-time ${timeClass}">${ts.label}</span>` : '';
 
-  let metaHtml = '';
-  if (queue) metaHtml += `<span class="badge queue">📋 ${escHtml(queue)}</span>`;
-  if (agentName) metaHtml += `<span class="badge agent">👤 ${escHtml(agentName)}</span>`;
-  tags.forEach(t => { metaHtml += `<span class="badge tag">${escHtml(t)}</span>`; });
+  let meta = '';
+  if (queue) meta += `<span class="badge queue">📋 ${escHtml(queue)}</span>`;
+  tags.forEach(t => { meta += `<span class="badge">${escHtml(t)}</span>`; });
 
   card.innerHTML = `
     <div class="card-top">
-      <div class="avatar" style="background:${avatarColor}; color:${avatarTextColor};">${escHtml(initials)}</div>
+      <div class="avatar" style="background:${cfg.dim};color:${cfg.color};">${escHtml(getInitials(first,last))}</div>
       <div class="card-info">
         <div class="card-name">${escHtml(name)}</div>
         <div class="card-contact">${escHtml(contactId)}</div>
       </div>
       ${timeHtml}
     </div>
-    ${metaHtml ? `<div class="card-meta">${metaHtml}</div>` : ''}
-    ${chName ? `<div class="card-channel-name">📡 ${escHtml(chName)}</div>` : ''}
-  `;
-
+    ${meta ? `<div class="card-meta">${meta}</div>` : ''}`;
   return card;
 }
 
-// ─── FILTER ───────────────────────────────────────────────────────────────────
+// ── FILTERS ────────────────────────────────────────────────────────────────────
 function setFilter(f) {
   activeFilter = f;
-  document.querySelectorAll('.filter-chip').forEach(c => {
-    c.classList.toggle('active', c.dataset.filter === f);
-  });
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
   renderBoard();
 }
 
-// ─── COUNTDOWN ────────────────────────────────────────────────────────────────
+// ── COUNTDOWN ──────────────────────────────────────────────────────────────────
 function startCountdown() {
   clearInterval(countdownTimer);
-  countdownValue = REFRESH_INTERVAL;
-  updateCountdownDisplay();
-  countdownTimer = setInterval(() => {
-    countdownValue--;
-    updateCountdownDisplay();
-    if (countdownValue <= 0) {
-      clearInterval(countdownTimer);
-      refreshData();
-    }
+  let v = REFRESH_SEC;
+  document.getElementById('countdown-display').textContent = v + 's';
+  setInterval(() => {
+    v--;
+    document.getElementById('countdown-display').textContent = v + 's';
+    if (v <= 0) { clearInterval(countdownTimer); refreshData(); }
   }, 1000);
 }
 
-function updateCountdownDisplay() {
-  document.getElementById('countdown-display').textContent = `${countdownValue}s`;
-}
-
-// ─── UI HELPERS ───────────────────────────────────────────────────────────────
-function showLoading(show) {
-  document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
-}
-
-function setLoadingText(text) {
-  document.getElementById('loading-text').textContent = text;
-}
-
-function showError(msg) {
-  const bar = document.getElementById('error-bar');
-  if (msg) {
-    bar.textContent = msg;
-    bar.style.display = 'block';
-  } else {
-    bar.style.display = 'none';
+function openAliases() {
+  var body = document.getElementById('aliases-body');
+  body.innerHTML = '';
+  var platOrder = ['whatsapp','facebook','instagram','webchat','other'];
+  var ids = Object.keys(channelMap).sort(function(a,b){
+    var diff = platOrder.indexOf(getPlatform(a)) - platOrder.indexOf(getPlatform(b));
+    if (diff !== 0) return diff;
+    return getRawLabel(channelMap[a]).localeCompare(getRawLabel(channelMap[b]));
+  });
+  if (ids.length === 0) {
+    body.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Carga el tablero primero.</p>';
+    document.getElementById('aliases-modal').classList.add('open');
+    return;
   }
+  ids.forEach(function(cid) {
+    var ch   = channelMap[cid];
+    var plat = ch.platform || getPlatform(cid);
+    var cfg  = PLATFORMS[plat] || PLATFORMS.other;
+    var raw  = getRawLabel(ch);
+    var row  = document.createElement('div');
+    row.className = 'alias-row';
+    row.innerHTML =
+      '<div class="alias-icon" style="background:'+cfg.dim+';color:'+cfg.color+';">'+cfg.icon+'</div>'+
+      '<div class="alias-original" title="'+escHtml(cid)+'">'+escHtml(raw||cid)+'</div>'+
+      '<input class="alias-input" data-channel-id="'+escHtml(cid)+'" data-original-name="'+escHtml(ch.name||'')+'" placeholder="Nombre del canal..." value="'+escHtml(ch.name||'')+'" maxlength="60" />'+
+      '<span class="alias-status" data-cid="'+escHtml(cid)+'"></span>';
+    body.appendChild(row);
+  });
+  document.getElementById('aliases-modal').classList.add('open');
 }
 
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function closeAliases() {
+  document.getElementById('aliases-modal').classList.remove('open');
+}
+
+async function saveAliases() {
+  var inputs = Array.from(document.querySelectorAll('.alias-input'));
+  var changed = inputs.filter(function(i){ return i.value.trim() !== i.dataset.originalName; });
+  if (changed.length === 0) { closeAliases(); return; }
+  var btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Guardando 0/' + changed.length + '...';
+  var done = 0;
+  for (var i = 0; i < changed.length; i++) {
+    var input = changed[i];
+    var cid = input.dataset.channelId;
+    var newName = input.value.trim();
+    var statusEl = document.querySelector('.alias-status[data-cid="' + CSS.escape(cid) + '"]');
+    try {
+      var res = await fetch(API_BASE + '/channels/' + encodeURIComponent(cid), {
+        method: 'PATCH',
+        headers: { 'access-token': token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (channelMap[cid]) channelMap[cid].name = newName;
+      if (statusEl) { statusEl.textContent = 'OK'; statusEl.style.color = '#34d399'; }
+    } catch(e) {
+      if (statusEl) { statusEl.textContent = 'ERR'; statusEl.style.color = '#ff6b6b'; }
+    }
+    done++;
+    btn.textContent = 'Guardando ' + done + '/' + changed.length + '...';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Guardar';
+  renderBoard();
+  setTimeout(closeAliases, 900);
+}
+
+function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
+function setLoadingText(t) { document.getElementById('loading-text').textContent = t; }
+function showError(msg) {
+  var bar = document.getElementById('error-bar');
+  bar.style.display = msg ? 'block' : 'none';
+  if (msg) bar.textContent = msg;
 }
 </script>
 </body>
