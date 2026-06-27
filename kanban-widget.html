@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanban Conversaciones · Botmaker</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3250;
+      --text: #e2e8f0;
+      --text-muted: #8892b0;
+      --whatsapp: #25d366;
+      --whatsapp-dim: rgba(37,211,102,0.12);
+      --webchat: #3b9eff;
+      --webchat-dim: rgba(59,158,255,0.12);
+      --facebook: #1877f2;
+      --facebook-dim: rgba(24,119,242,0.12);
+      --instagram: #e1306c;
+      --instagram-dim: rgba(225,48,108,0.12);
+      --other: #9b59b6;
+      --other-dim: rgba(155,89,182,0.12);
+      --radius: 10px;
+      --card-radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── CONFIG SCREEN ── */
+    #config-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .config-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .config-card h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .config-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--webchat); }
+    .form-group select option { background: var(--surface2); }
+    .btn-primary {
+      width: 100%;
+      background: var(--webchat);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-primary:hover { opacity: .85; }
+
+    /* ── MAIN LAYOUT ── */
+    #app { display: none; flex-direction: column; height: 100vh; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .topbar-title { font-size: 14px; font-weight: 600; flex: 1; }
+    .topbar-meta { font-size: 12px; color: var(--text-muted); }
+    .refresh-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 5px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color .2s;
+    }
+    .refresh-btn:hover { color: var(--text); }
+    .refresh-btn.spinning svg { animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .countdown {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 26px;
+      text-align: right;
+    }
+    .config-link {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+    }
+    .config-link:hover { color: var(--text); background: var(--surface2); }
+
+    /* ── FILTER BAR ── */
+    .filterbar {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+    .filter-chip {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s;
+    }
+    .filter-chip.active { color: #fff; border-color: transparent; }
+    .filter-chip[data-filter="all"].active { background: var(--surface2); color: var(--text); border-color: var(--border); }
+    .filter-chip[data-filter="whatsapp"].active { background: var(--whatsapp); }
+    .filter-chip[data-filter="webchat"].active { background: var(--webchat); }
+    .filter-chip[data-filter="facebook"].active { background: var(--facebook); }
+    .filter-chip[data-filter="instagram"].active { background: var(--instagram); }
+
+    /* ── KANBAN BOARD ── */
+    .board {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      overflow-x: auto;
+      flex: 1;
+      align-items: flex-start;
+    }
+
+    .column {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 260px;
+      min-width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 140px);
+    }
+
+    .col-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      border-radius: var(--radius) var(--radius) 0 0;
+      flex-shrink: 0;
+    }
+    .col-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .col-title { font-size: 13px; font-weight: 600; flex: 1; }
+    .col-count {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: var(--surface2);
+      color: var(--text-muted);
+    }
+
+    .col-body {
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+    .col-body::-webkit-scrollbar { width: 4px; }
+    .col-body::-webkit-scrollbar-track { background: transparent; }
+    .col-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── CHAT CARD ── */
+    .card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 11px 12px;
+      cursor: pointer;
+      transition: border-color .15s, transform .1s;
+      text-decoration: none;
+      display: block;
+    }
+    .card:hover { border-color: rgba(255,255,255,.2); transform: translateY(-1px); }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .card-info { flex: 1; min-width: 0; }
+    .card-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-contact {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .card-time.urgent { color: #ff6b6b; font-weight: 600; }
+    .card-time.warning { color: #ffc107; }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .badge.queue { color: #a78bfa; border-color: rgba(167,139,250,.3); }
+    .badge.agent { color: #34d399; border-color: rgba(52,211,153,.3); }
+    .badge.tag { color: var(--text-muted); }
+
+    .card-channel-name {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* ── EMPTY / LOADING ── */
+    .col-empty {
+      text-align: center;
+      padding: 28px 12px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .col-empty svg { opacity: .3; margin-bottom: 8px; }
+
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,17,23,.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .loader {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--webchat);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    #error-bar {
+      display: none;
+      background: rgba(255,107,107,.1);
+      border: 1px solid rgba(255,107,107,.3);
+      color: #ff6b6b;
+      font-size: 12px;
+      padding: 8px 16px;
+      text-align: center;
+    }
+
+    .total-bar {
+      padding: 6px 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .total-bar strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div id="config-screen">
+  <div class="config-card">
+    <h2>🤖 Kanban Conversaciones</h2>
+    <p>Ingresa tu Access Token de Botmaker para comenzar. Se guarda en memoria de la sesión.</p>
+    <div class="form-group">
+      <label>Access Token</label>
+      <input type="password" id="input-token" placeholder="eyJhbGciOiJ..." />
+    </div>
+    <div class="form-group">
+      <label>Rango de tiempo</label>
+      <select id="input-days">
+        <option value="1">Últimas 24 horas</option>
+        <option value="3">Últimos 3 días</option>
+        <option value="7" selected>Últimos 7 días</option>
+        <option value="14">Últimas 2 semanas</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="startApp()">Ver Kanban →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="loading-overlay">
+    <div class="loader"></div>
+    <span id="loading-text">Cargando canales y conversaciones…</span>
+  </div>
+
+  <div class="topbar">
+    <span class="topbar-title">📊 Kanban · Conversaciones por Canal</span>
+    <span class="topbar-meta" id="last-updated"></span>
+    <span class="countdown" id="countdown-display"></span>
+    <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
+      <svg id="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      Actualizar
+    </button>
+    <button class="config-link" onclick="showConfig()">⚙</button>
+  </div>
+
+  <div id="error-bar"></div>
+
+  <div class="filterbar">
+    <button class="filter-chip active" data-filter="all" onclick="setFilter('all')">Todos</button>
+    <button class="filter-chip" data-filter="whatsapp" onclick="setFilter('whatsapp')">📱 WhatsApp</button>
+    <button class="filter-chip" data-filter="webchat" onclick="setFilter('webchat')">💬 Webchat</button>
+    <button class="filter-chip" data-filter="facebook" onclick="setFilter('facebook')">📘 Facebook</button>
+    <button class="filter-chip" data-filter="instagram" onclick="setFilter('instagram')">📷 Instagram</button>
+  </div>
+
+  <div class="total-bar" id="total-bar"></div>
+
+  <div class="board" id="board"></div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const API_BASE = 'https://api.botmaker.com/v2.0';
+const REFRESH_INTERVAL = 60; // seconds
+let token = '';
+let daysBack = 7;
+let allChats = [];
+let channelMap = {}; // channelId → channel obj
+let agentMap = {};   // agentId → name
+let activeFilter = 'all';
+let countdownTimer = null;
+let countdownValue = REFRESH_INTERVAL;
+
+// Read token from URL param if present
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('token')) {
+  token = urlParams.get('token');
+  daysBack = parseInt(urlParams.get('days') || '7');
+  document.getElementById('config-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  loadData();
+}
+
+// ─── PLATFORM UTILS ───────────────────────────────────────────────────────────
+const PLATFORMS = {
+  whatsapp: {
+    label: 'WhatsApp',
+    icon: '📱',
+    color: '#25d366',
+    dim: 'rgba(37,211,102,0.12)',
+    bg: '#1a3327'
+  },
+  webchat: {
+    label: 'Webchat',
+    icon: '💬',
+    color: '#3b9eff',
+    dim: 'rgba(59,158,255,0.12)',
+    bg: '#1a2a3f'
+  },
+  facebook: {
+    label: 'Facebook',
+    icon: '📘',
+    color: '#1877f2',
+    dim: 'rgba(24,119,242,0.12)',
+    bg: '#1a2440'
+  },
+  instagram: {
+    label: 'Instagram',
+    icon: '📷',
+    color: '#e1306c',
+    dim: 'rgba(225,48,108,0.12)',
+    bg: '#3a1a28'
+  },
+  other: {
+    label: 'Otros',
+    icon: '🔗',
+    color: '#9b59b6',
+    dim: 'rgba(155,89,182,0.12)',
+    bg: '#271a3a'
+  }
+};
+
+function getPlatform(channelId) {
+  if (!channelId) return 'other';
+  const id = channelId.toLowerCase();
+  if (id.includes('-whatsapp-')) return 'whatsapp';
+  if (id.includes('-webchat-')) return 'webchat';
+  if (id.includes('-facebook-') || id.includes('-messenger-')) return 'facebook';
+  if (id.includes('-instagram-')) return 'instagram';
+  return 'other';
+}
+
+function getInitials(first, last) {
+  const f = (first || '').trim();
+  const l = (last || '').trim();
+  if (!f && !l) return '?';
+  return ((f[0] || '') + (l[0] || '')).toUpperCase() || f[0].toUpperCase();
+}
+
+function timeSince(dateStr) {
+  if (!dateStr) return null;
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60) return { label: `${diff}s`, urgent: diff > 300 };
+  if (diff < 3600) { const m = Math.floor(diff/60); return { label: `${m}m`, urgent: m > 30, warning: m > 10 }; }
+  if (diff < 86400) { const h = Math.floor(diff/3600); return { label: `${h}h`, urgent: h > 4, warning: h > 1 }; }
+  const d = Math.floor(diff/86400);
+  return { label: `${d}d`, urgent: false };
+}
+
+function formatLastUpdated() {
+  return new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ─── APP START ────────────────────────────────────────────────────────────────
+function startApp() {
+  const t = document.getElementById('input-token').value.trim();
+  if (!t) { alert('Ingresa un Access Token válido.'); return; }
+  token = t;
+  daysBack = parseInt(document.getElementById('input-days').value);
+  document.getElementById('config-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  loadData();
+}
+
+function showConfig() {
+  clearInterval(countdownTimer);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('config-screen').style.display = 'flex';
+}
+
+// ─── DATA LOADING ─────────────────────────────────────────────────────────────
+async function loadData() {
+  showLoading(true);
+  showError(null);
+
+  try {
+    // Fetch channels
+    setLoadingText('Cargando canales…');
+    const chRes = await apiFetch('/channels');
+    channelMap = {};
+    (chRes.items || []).forEach(c => { channelMap[c.id] = c; });
+
+    // Fetch agents
+    setLoadingText('Cargando agentes…');
+    try {
+      const agRes = await apiFetch('/operators');
+      agentMap = {};
+      (agRes.items || []).forEach(a => {
+        agentMap[a.id] = a.name || a.email || a.id;
+      });
+    } catch(e) { /* agents are optional */ }
+
+    // Fetch chats
+    setLoadingText('Cargando conversaciones…');
+    const from = new Date();
+    from.setDate(from.getDate() - daysBack);
+    const chatRes = await apiFetch(`/chats?from=${from.toISOString()}`);
+    allChats = chatRes.items || [];
+
+    // Paginate if needed
+    let nextPage = chatRes.nextPage;
+    while (nextPage && allChats.length < 500) {
+      setLoadingText(`Cargando más… (${allChats.length})`);
+      const next = await apiFetchUrl(nextPage);
+      allChats = allChats.concat(next.items || []);
+      nextPage = next.nextPage;
+    }
+
+    renderBoard();
+    document.getElementById('last-updated').textContent = `Actualizado: ${formatLastUpdated()}`;
+    startCountdown();
+
+  } catch(err) {
+    showError(`Error al cargar datos: ${err.message}`);
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function refreshData() {
+  clearInterval(countdownTimer);
+  document.getElementById('refresh-btn').classList.add('spinning');
+  await loadData();
+  document.getElementById('refresh-btn').classList.remove('spinning');
+}
+
+// ─── API HELPERS ──────────────────────────────────────────────────────────────
+async function apiFetch(path) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { 'access-token': token, 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} en ${path}`);
+  return res.json();
+}
+
+async function apiFetchUrl(url) {
+  const res = await fetch(url, {
+    headers: { 'access-token': token, 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  // Group chats by platform
+  const groups = {};
+  const filtered = activeFilter === 'all'
+    ? allChats
+    : allChats.filter(c => getPlatform(c.chat?.channelId) === activeFilter);
+
+  filtered.forEach(chat => {
+    const plat = getPlatform(chat.chat?.channelId);
+    if (!groups[plat]) groups[plat] = [];
+    groups[plat].push(chat);
+  });
+
+  // Total bar
+  const total = filtered.length;
+  const platformCounts = Object.entries(groups)
+    .map(([p, chats]) => `${PLATFORMS[p]?.icon} ${PLATFORMS[p]?.label}: <strong>${chats.length}</strong>`)
+    .join(' &nbsp;·&nbsp; ');
+  document.getElementById('total-bar').innerHTML =
+    `<strong>${total}</strong> conversación${total !== 1 ? 'es' : ''} ${activeFilter !== 'all' ? 'filtradas' : 'en total'}` +
+    (platformCounts ? `&nbsp; &nbsp; ${platformCounts}` : '');
+
+  // Render each platform column
+  const order = ['whatsapp', 'webchat', 'facebook', 'instagram', 'other'];
+  const toRender = activeFilter === 'all'
+    ? order.filter(p => groups[p])
+    : [activeFilter].filter(p => groups[p] || true);
+
+  if (activeFilter !== 'all') {
+    const col = buildColumn(activeFilter, groups[activeFilter] || []);
+    col.style.width = '100%';
+    col.style.minWidth = '0';
+    col.style.maxWidth = '100%';
+    board.appendChild(col);
+  } else {
+    toRender.forEach(plat => {
+      board.appendChild(buildColumn(plat, groups[plat] || []));
+    });
+  }
+}
+
+function buildColumn(plat, chats) {
+  const cfg = PLATFORMS[plat] || PLATFORMS.other;
+
+  // Sort: most recent last message first
+  chats.sort((a, b) => {
+    const da = new Date(a.lastUserMessageDatetime || a.creationTime || 0);
+    const db = new Date(b.lastUserMessageDatetime || b.creationTime || 0);
+    return db - da;
+  });
+
+  const col = document.createElement('div');
+  col.className = 'column';
+
+  col.innerHTML = `
+    <div class="col-header">
+      <div class="col-icon" style="background:${cfg.dim}; color:${cfg.color}; font-size:16px;">
+        ${cfg.icon}
+      </div>
+      <span class="col-title">${cfg.label}</span>
+      <span class="col-count" style="color:${cfg.color}">${chats.length}</span>
+    </div>
+    <div class="col-body" id="col-body-${plat}"></div>
+  `;
+
+  const body = col.querySelector(`#col-body-${plat}`);
+
+  if (chats.length === 0) {
+    body.innerHTML = `
+      <div class="col-empty">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <div>Sin conversaciones</div>
+      </div>`;
+  } else {
+    chats.forEach(chat => {
+      body.appendChild(buildCard(chat, cfg));
+    });
+  }
+
+  return col;
+}
+
+function buildCard(chat, cfg) {
+  const first = chat.firstName || '';
+  const last = chat.lastName || '';
+  const name = [first, last].filter(Boolean).join(' ') || chat.chat?.contactId || 'Sin nombre';
+  const contactId = chat.chat?.contactId || '';
+  const chatId = chat.chat?.chatId || '';
+  const channelId = chat.chat?.channelId || '';
+
+  const ts = timeSince(chat.lastUserMessageDatetime || chat.lastSessionCreationTime);
+  const agentName = chat.agentId ? (agentMap[chat.agentId] || chat.agentId) : null;
+  const queue = chat.queueId || null;
+  const tags = (chat.tags || []).slice(0, 3);
+
+  // Channel name from map
+  const chObj = channelMap[channelId];
+  const chName = chObj?.name || (chObj?.number ? `+${chObj.number}` : null);
+
+  const url = chatId ? `https://go.botmaker.com/#/chats/${chatId}` : '#';
+
+  const initials = getInitials(first, last);
+  const avatarColor = cfg.dim;
+  const avatarTextColor = cfg.color;
+
+  const card = document.createElement('a');
+  card.className = 'card';
+  card.href = url;
+  card.target = '_blank';
+  card.rel = 'noopener';
+
+  let timeHtml = '';
+  if (ts) {
+    const cls = ts.urgent ? 'urgent' : (ts.warning ? 'warning' : '');
+    timeHtml = `<span class="card-time ${cls}">${ts.label}</span>`;
+  }
+
+  let metaHtml = '';
+  if (queue) metaHtml += `<span class="badge queue">📋 ${escHtml(queue)}</span>`;
+  if (agentName) metaHtml += `<span class="badge agent">👤 ${escHtml(agentName)}</span>`;
+  tags.forEach(t => { metaHtml += `<span class="badge tag">${escHtml(t)}</span>`; });
+
+  card.innerHTML = `
+    <div class="card-top">
+      <div class="avatar" style="background:${avatarColor}; color:${avatarTextColor};">${escHtml(initials)}</div>
+      <div class="card-info">
+        <div class="card-name">${escHtml(name)}</div>
+        <div class="card-contact">${escHtml(contactId)}</div>
+      </div>
+      ${timeHtml}
+    </div>
+    ${metaHtml ? `<div class="card-meta">${metaHtml}</div>` : ''}
+    ${chName ? `<div class="card-channel-name">📡 ${escHtml(chName)}</div>` : ''}
+  `;
+
+  return card;
+}
+
+// ─── FILTER ───────────────────────────────────────────────────────────────────
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === f);
+  });
+  renderBoard();
+}
+
+// ─── COUNTDOWN ────────────────────────────────────────────────────────────────
+function startCountdown() {
+  clearInterval(countdownTimer);
+  countdownValue = REFRESH_INTERVAL;
+  updateCountdownDisplay();
+  countdownTimer = setInterval(() => {
+    countdownValue--;
+    updateCountdownDisplay();
+    if (countdownValue <= 0) {
+      clearInterval(countdownTimer);
+      refreshData();
+    }
+  }, 1000);
+}
+
+function updateCountdownDisplay() {
+  document.getElementById('countdown-display').textContent = `${countdownValue}s`;
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function showLoading(show) {
+  document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+}
+
+function setLoadingText(text) {
+  document.getElementById('loading-text').textContent = text;
+}
+
+function showError(msg) {
+  const bar = document.getElementById('error-bar');
+  if (msg) {
+    bar.textContent = msg;
+    bar.style.display = 'block';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
