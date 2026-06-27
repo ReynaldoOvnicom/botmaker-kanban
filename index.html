@@ -421,12 +421,16 @@
 
   <div id="error-bar"></div>
 
-  <div class="filterbar">
+  <div class="filterbar" id="filterbar">
     <button class="filter-chip active" data-filter="all" onclick="setFilter('all')">Todos</button>
     <button class="filter-chip" data-filter="whatsapp" onclick="setFilter('whatsapp')">📱 WhatsApp</button>
     <button class="filter-chip" data-filter="webchat" onclick="setFilter('webchat')">💬 Webchat</button>
     <button class="filter-chip" data-filter="facebook" onclick="setFilter('facebook')">📘 Facebook</button>
     <button class="filter-chip" data-filter="instagram" onclick="setFilter('instagram')">📷 Instagram</button>
+    <label class="filter-chip" style="cursor:pointer; user-select:none;">
+      <input type="checkbox" id="show-empty" onchange="renderBoard()" style="margin-right:4px; accent-color:#3b9eff;">
+      Ver canales vacíos
+    </label>
   </div>
 
   <div class="total-bar" id="total-bar"></div>
@@ -618,57 +622,97 @@ async function apiFetchUrl(url) {
 }
 
 // ─── RENDER ───────────────────────────────────────────────────────────────────
+function getChannelLabel(ch) {
+  if (!ch) return 'Canal desconocido';
+  if (ch.name) return ch.name;
+  if (ch.number) return `+${ch.number}`;
+  return ch.id || 'Sin nombre';
+}
+
 function renderBoard() {
   const board = document.getElementById('board');
   board.innerHTML = '';
+  const showEmpty = document.getElementById('show-empty')?.checked;
 
-  // Group chats by platform
-  const groups = {};
-  const filtered = activeFilter === 'all'
-    ? allChats
-    : allChats.filter(c => getPlatform(c.chat?.channelId) === activeFilter);
+  // Build map: channelId → chats[]
+  const chatsByChannel = {};
+  allChats.forEach(chat => {
+    const cid = chat.chat?.channelId || '__unknown__';
+    if (!chatsByChannel[cid]) chatsByChannel[cid] = [];
+    chatsByChannel[cid].push(chat);
+  });
 
-  filtered.forEach(chat => {
-    const plat = getPlatform(chat.chat?.channelId);
-    if (!groups[plat]) groups[plat] = [];
-    groups[plat].push(chat);
+  // Determine which channels to show
+  // Start from channelMap (all known channels) + any channelId found in chats
+  const allChannelIds = new Set([
+    ...Object.keys(channelMap),
+    ...Object.keys(chatsByChannel)
+  ]);
+
+  // Filter by active platform filter
+  let channelsToShow = [...allChannelIds].filter(cid => {
+    const plat = getPlatform(cid);
+    return activeFilter === 'all' || plat === activeFilter;
+  });
+
+  // Hide empty if checkbox is off
+  if (!showEmpty) {
+    channelsToShow = channelsToShow.filter(cid => (chatsByChannel[cid] || []).length > 0);
+  }
+
+  // Sort channels: by platform order, then by name
+  const platOrder = ['whatsapp', 'facebook', 'instagram', 'webchat', 'other'];
+  channelsToShow.sort((a, b) => {
+    const pa = platOrder.indexOf(getPlatform(a));
+    const pb = platOrder.indexOf(getPlatform(b));
+    if (pa !== pb) return pa - pb;
+    const na = getChannelLabel(channelMap[a] || { id: a });
+    const nb = getChannelLabel(channelMap[b] || { id: b });
+    return na.localeCompare(nb);
   });
 
   // Total bar
-  const total = filtered.length;
-  const platformCounts = Object.entries(groups)
-    .map(([p, chats]) => `${PLATFORMS[p]?.icon} ${PLATFORMS[p]?.label}: <strong>${chats.length}</strong>`)
+  const filteredChats = allChats.filter(c =>
+    activeFilter === 'all' || getPlatform(c.chat?.channelId) === activeFilter
+  );
+  const total = filteredChats.length;
+
+  // Count by platform for summary
+  const platCounts = {};
+  filteredChats.forEach(c => {
+    const p = getPlatform(c.chat?.channelId);
+    platCounts[p] = (platCounts[p] || 0) + 1;
+  });
+  const platSummary = Object.entries(platCounts)
+    .map(([p, n]) => `${PLATFORMS[p]?.icon || '🔗'} ${PLATFORMS[p]?.label || p}: <strong>${n}</strong>`)
     .join(' &nbsp;·&nbsp; ');
+
   document.getElementById('total-bar').innerHTML =
-    `<strong>${total}</strong> conversación${total !== 1 ? 'es' : ''} ${activeFilter !== 'all' ? 'filtradas' : 'en total'}` +
-    (platformCounts ? `&nbsp; &nbsp; ${platformCounts}` : '');
+    `<strong>${total}</strong> conversación${total !== 1 ? 'es' : ''} · <strong>${channelsToShow.length}</strong> canal${channelsToShow.length !== 1 ? 'es' : ''}` +
+    (platSummary ? `&nbsp;&nbsp; ${platSummary}` : '');
 
-  // Render each platform column
-  const order = ['whatsapp', 'webchat', 'facebook', 'instagram', 'other'];
-  const toRender = activeFilter === 'all'
-    ? order.filter(p => groups[p])
-    : [activeFilter].filter(p => groups[p] || true);
-
-  if (activeFilter !== 'all') {
-    const col = buildColumn(activeFilter, groups[activeFilter] || []);
-    col.style.width = '100%';
-    col.style.minWidth = '0';
-    col.style.maxWidth = '100%';
-    board.appendChild(col);
-  } else {
-    toRender.forEach(plat => {
-      board.appendChild(buildColumn(plat, groups[plat] || []));
-    });
+  if (channelsToShow.length === 0) {
+    board.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:32px;">Sin canales con conversaciones en el período seleccionado.</div>`;
+    return;
   }
+
+  channelsToShow.forEach(cid => {
+    const chats = chatsByChannel[cid] || [];
+    const channel = channelMap[cid] || { id: cid, platform: getPlatform(cid) };
+    board.appendChild(buildColumn(channel, chats));
+  });
 }
 
-function buildColumn(plat, chats) {
+function buildColumn(channel, chats) {
+  const plat = channel.platform || getPlatform(channel.id || '');
   const cfg = PLATFORMS[plat] || PLATFORMS.other;
+  const colLabel = getChannelLabel(channel);
+  const safeId = (channel.id || 'unknown').replace(/[^a-z0-9]/gi, '_');
 
   // Sort: most recent last message first
   chats.sort((a, b) => {
-    const da = new Date(a.lastUserMessageDatetime || a.creationTime || 0);
-    const db = new Date(b.lastUserMessageDatetime || b.creationTime || 0);
+    const da = new Date(a.lastUserMessageDatetime || a.lastSessionCreationTime || a.creationTime || 0);
+    const db = new Date(b.lastUserMessageDatetime || b.lastSessionCreationTime || b.creationTime || 0);
     return db - da;
   });
 
@@ -676,17 +720,20 @@ function buildColumn(plat, chats) {
   col.className = 'column';
 
   col.innerHTML = `
-    <div class="col-header">
+    <div class="col-header" title="${escHtml(channel.id || '')}">
       <div class="col-icon" style="background:${cfg.dim}; color:${cfg.color}; font-size:16px;">
         ${cfg.icon}
       </div>
-      <span class="col-title">${cfg.label}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="col-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(colLabel)}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">${cfg.label}</div>
+      </div>
       <span class="col-count" style="color:${cfg.color}">${chats.length}</span>
     </div>
-    <div class="col-body" id="col-body-${plat}"></div>
+    <div class="col-body" id="col-body-${safeId}"></div>
   `;
 
-  const body = col.querySelector(`#col-body-${plat}`);
+  const body = col.querySelector(`#col-body-${safeId}`);
 
   if (chats.length === 0) {
     body.innerHTML = `
@@ -718,9 +765,9 @@ function buildCard(chat, cfg) {
   const queue = chat.queueId || null;
   const tags = (chat.tags || []).slice(0, 3);
 
-  // Channel name from map
+  // Channel name — shown only if card is in an "unknown" column
   const chObj = channelMap[channelId];
-  const chName = chObj?.name || (chObj?.number ? `+${chObj.number}` : null);
+  const chName = null; // now shown in column header, not per card
 
   const url = chatId ? `https://go.botmaker.com/#/chats/${chatId}` : '#';
 
