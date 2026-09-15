@@ -280,14 +280,22 @@ async function initApp() {
 }
 
 async function loadCloseIntents() {
-  const res = await apiFetch('/intents');
-  const items = res.items || [];
   const byBot = {};
-  items.forEach(it => {
-    if (!it.bot || it.bot.id === MASTER_BOT_ID) return;
-    if (!/:CLOSE_CONVERSATION$/.test(it.id || '')) return;
-    byBot[it.bot.id] = { botId: it.bot.id, botName: it.bot.name || it.bot.id, intentId: it.id };
-  });
+  let nextUrl = `${API_BASE}/intents`;
+  let page = 0;
+  while (nextUrl) {
+    const res = await fetch(nextUrl, { headers: { 'access-token': token } });
+    if (!res.ok) throw new Error(`HTTP ${res.status} en /intents`);
+    const data = await res.json();
+    (data.items || []).forEach(it => {
+      if (!it.bot || it.bot.id === MASTER_BOT_ID) return;
+      if (!/:CLOSE_CONVERSATION$/.test(it.id || '')) return;
+      byBot[it.bot.id] = { botId: it.bot.id, botName: it.bot.name || it.bot.id, intentId: it.id };
+    });
+    nextUrl = data.nextPage || null;
+    page++;
+    setLoadingText(`Buscando bots con CLOSE_CONVERSATION… (página ${page}, ${Object.keys(byBot).length} encontrados)`);
+  }
   closeIntentsByBot = Object.values(byBot);
 }
 
