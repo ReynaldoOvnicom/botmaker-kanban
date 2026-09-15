@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Conversaciones atrapadas en Masterbot · Botmaker</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3250;
+    --text: #e2e8f0;
+    --text-muted: #8892b0;
+    --radius: 10px;
+    --card-radius: 8px;
+    --danger: #ff6b6b;
+    --ok: #34d399;
+    --accent: #3b9eff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* CONFIG SCREEN */
+  #config-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+  .config-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; width: 100%; max-width: 440px; }
+  .config-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .config-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .form-group input, .form-group select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; padding: 9px 12px; outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .checkbox-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+  .checkbox-row input { accent-color: var(--accent); }
+  .btn-primary { width: 100%; background: var(--accent); border: none; border-radius: 6px; color: #fff; font-size: 14px; font-weight: 600; padding: 11px; cursor: pointer; }
+  .btn-primary:hover { opacity: .85; }
+  .warn-box { background: rgba(255,193,7,.1); border: 1px solid rgba(255,193,7,.3); color: #ffc107; font-size: 11px; padding: 8px 10px; border-radius: 6px; margin-bottom: 16px; line-height: 1.4; }
+
+  /* MAIN APP */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  .topbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .topbar-title { font-size: 14px; font-weight: 600; flex: 1; white-space: nowrap; }
+  .topbar-meta { font-size: 11px; color: var(--text-muted); }
+  select.range-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; padding: 6px 8px; }
+  .icon-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: 12px; padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .icon-btn:hover { color: var(--text); }
+  .icon-btn.primary { background: var(--accent); color: #fff; border-color: transparent; }
+  .icon-btn.primary:hover { opacity: .85; }
+  .icon-btn.spinning svg { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #error-bar { display: none; background: rgba(255,107,107,.1); border-bottom: 1px solid rgba(255,107,107,.3); color: var(--danger); font-size: 12px; padding: 8px 14px; }
+  #quota-note { background: rgba(59,158,255,.08); border-bottom: 1px solid rgba(59,158,255,.25); color: var(--accent); font-size: 11px; padding: 6px 14px; }
+
+  .total-bar { padding: 8px 14px; font-size: 12px; color: var(--text-muted); }
+  .total-bar strong { color: var(--text); }
+
+  .list { display: flex; flex-direction: column; gap: 8px; padding: 4px 14px 24px; }
+  .row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 12px 14px; display: flex; align-items: center; gap: 14px; }
+  .row.closing { opacity: .5; }
+  .row.done { border-color: rgba(52,211,153,.4); }
+  .row.error { border-color: rgba(255,107,107,.4); }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .row-info { flex: 1; min-width: 0; }
+  .row-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+  .badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap; }
+  .badge.master { color: #ffc107; border-color: rgba(255,193,7,.3); }
+  .row-time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
+  .row-time.urgent { color: var(--danger); font-weight: 600; }
+  .row-actions { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+  .btn-close { background: var(--danger); border: none; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 600; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+  .btn-close:hover { opacity: .85; }
+  .btn-close:disabled { opacity: .5; cursor: default; }
+  .btn-map { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: 11px; padding: 8px 10px; cursor: pointer; white-space: nowrap; }
+  .status-ok { color: var(--ok); font-size: 12px; font-weight: 600; }
+  .status-err { color: var(--danger); font-size: 12px; font-weight: 600; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 13px; }
+
+  #loading-overlay { position: fixed; inset: 0; background: rgba(15,17,23,.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; gap: 12px; font-size: 13px; color: var(--text-muted); }
+  #loading-overlay.show { display: flex; }
+  .loader { width: 26px; height: 26px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+
+  /* MAPPING MODAL */
+  #map-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+  #map-modal.open { display: flex; }
+  .modal-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 560px; max-height: 80vh; display: flex; flex-direction: column; }
+  .modal-header { display: flex; align-items: center; padding: 15px 18px; border-bottom: 1px solid var(--border); gap: 10px; }
+  .modal-header h3 { font-size: 15px; font-weight: 600; flex: 1; }
+  .modal-header p { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .modal-close { background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 9px; }
+  .map-row { display: flex; align-items: center; gap: 9px; }
+  .map-channel { font-size: 11px; color: var(--text-muted); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .map-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; padding: 7px 10px; width: 230px; }
+  .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .btn-secondary { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: 13px; font-weight: 500; padding: 8px 16px; cursor: pointer; }
+  .btn-secondary:hover { color: var(--text); }
+  .btn-save { background: var(--accent); border: none; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 600; padding: 8px 20px; cursor: pointer; }
+  .btn-save:hover { opacity: .85; }
+  .forget-token { font-size: 11px; color: var(--text-muted); text-decoration: underline; cursor: pointer; background: none; border: none; }
+</style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div id="config-screen">
+  <div class="config-card">
+    <h2>🔓 Conversaciones en Masterbot</h2>
+    <p>Detecta conversaciones que quedaron atascadas en <strong>masterbot</strong> (sin poder cerrarse desde la consola) y dispara el intent <code>CLOSE_CONVERSATION</code> del bot real que corresponda.</p>
+    <div class="warn-box">⚠ El Access Token se guarda en el <strong>localStorage</strong> de este navegador (no en el código). No lo compartas ni lo uses en equipos públicos.</div>
+    <div class="form-group">
+      <label>Access Token</label>
+      <input type="password" id="input-token" placeholder="eyJhbGciOiJ..." />
+    </div>
+    <div class="form-group">
+      <label>Rango a revisar</label>
+      <select id="input-days">
+        <option value="1" selected>Últimas 24 horas</option>
+        <option value="3">Últimos 3 días</option>
+        <option value="7">Últimos 7 días</option>
+        <option value="14">Últimas 2 semanas</option>
+      </select>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="input-remember" checked />
+      <label for="input-remember" style="text-transform:none;font-size:12px;">Recordar token en este navegador</label>
+    </div>
+    <button class="btn-primary" onclick="startApp()">Ver conversaciones →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="loading-overlay">
+    <div class="loader"></div>
+    <span id="loading-text">Cargando…</span>
+  </div>
+
+  <div class="topbar">
+    <span class="topbar-title">🔓 Atrapadas en Masterbot</span>
+    <select class="range-select" id="days-select" onchange="onDaysChange()">
+      <option value="1">Últimas 24h</option>
+      <option value="3">Últimos 3 días</option>
+      <option value="7">Últimos 7 días</option>
+      <option value="14">Últimas 2 semanas</option>
+    </select>
+    <span class="topbar-meta" id="last-updated"></span>
+    <button class="icon-btn primary" id="refresh-btn" onclick="refreshData()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      Actualizar
+    </button>
+    <button class="icon-btn" onclick="openMapping()">⚙ Bots por canal</button>
+    <button class="icon-btn" onclick="showConfig()">🔑 Token</button>
+  </div>
+
+  <div id="quota-note">ℹ Este panel es de actualización manual: cada clic en "Actualizar" consulta /sessions con eventos, lo que consume cuota BI de Botmaker. No hay auto-refresh.</div>
+  <div id="error-bar"></div>
+
+  <div class="total-bar" id="total-bar"></div>
+  <div class="list" id="list"></div>
+</div>
+
+<!-- MAPPING MODAL -->
+<div id="map-modal">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <div style="flex:1">
+        <h3>⚙ Bot destino por canal</h3>
+        <p>Al presionar "Cerrar", se dispara el intent CLOSE_CONVERSATION del bot que elijas aquí para ese canal.</p>
+      </div>
+      <button class="modal-close" onclick="closeMapping()">×</button>
+    </div>
+    <div class="modal-body" id="map-body"></div>
+    <div class="modal-footer">
+      <button class="forget-token" onclick="forgetToken()">🗑 Olvidar token guardado</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-secondary" onclick="closeMapping()">Cerrar</button>
+        <button class="btn-save" onclick="saveMapping()">Guardar mapeo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+const API_BASE = 'https://api.botmaker.com/v2.0';
+const MASTER_BOT_ID = 'MASTER';
+const LS_TOKEN_KEY = 'bmw_access_token';
+const LS_DAYS_KEY = 'bmw_days_back';
+const LS_MAP_KEY = 'bmw_channel_bot_map';
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let token = '';
+let daysBack = 1;
+let channelMap = {};      // channelId -> {id, name, ...}
+let closeIntentsByBot = []; // [{botId, botName, intentId}] excludes MASTER
+let channelBotMap = {};   // channelId -> botId (persisted)
+let stuckChats = [];      // current render list
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+(function boot() {
+  try {
+    const savedMap = localStorage.getItem(LS_MAP_KEY);
+    if (savedMap) channelBotMap = JSON.parse(savedMap);
+  } catch (e) { /* ignore corrupt storage */ }
+
+  let savedToken = null;
+  try { savedToken = localStorage.getItem(LS_TOKEN_KEY); } catch (e) { /* private mode, etc */ }
+
+  if (savedToken) {
+    token = savedToken;
+    try { daysBack = parseInt(localStorage.getItem(LS_DAYS_KEY) || '1'); } catch (e) {}
+    document.getElementById('days-select').value = String(daysBack);
+    document.getElementById('config-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initApp();
+  }
+})();
+
+function startApp() {
+  const t = document.getElementById('input-token').value.trim();
+  if (!t) { alert('Ingresa un Access Token válido.'); return; }
+  token = t;
+  daysBack = parseInt(document.getElementById('input-days').value);
+  const remember = document.getElementById('input-remember').checked;
+  try {
+    if (remember) {
+      localStorage.setItem(LS_TOKEN_KEY, token);
+      localStorage.setItem(LS_DAYS_KEY, String(daysBack));
+    } else {
+      localStorage.removeItem(LS_TOKEN_KEY);
+    }
+  } catch (e) { /* storage unavailable, continue in-memory only */ }
+  document.getElementById('days-select').value = String(daysBack);
+  document.getElementById('config-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+function showConfig() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('config-screen').style.display = 'flex';
+  document.getElementById('input-token').value = token;
+}
+
+function forgetToken() {
+  try { localStorage.removeItem(LS_TOKEN_KEY); } catch (e) {}
+  token = '';
+  closeMapping();
+  showConfig();
+}
+
+function onDaysChange() {
+  daysBack = parseInt(document.getElementById('days-select').value);
+  try { localStorage.setItem(LS_DAYS_KEY, String(daysBack)); } catch (e) {}
+}
+
+// ── INIT (cheap calls only: channels + intents) ───────────────────────────────
+async function initApp() {
+  showLoading(true, 'Cargando canales y bots…');
+  showError(null);
+  try {
+    const chRes = await apiFetch('/channels');
+    channelMap = {};
+    (chRes.items || []).forEach(c => { channelMap[c.id] = c; });
+
+    await loadCloseIntents();
+
+    renderList(); // empty state until first manual "Actualizar"
+  } catch (err) {
+    showError(`Error cargando configuración inicial: ${err.message}`);
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function loadCloseIntents() {
+  const res = await apiFetch('/intents');
+  const items = res.items || [];
+  const byBot = {};
+  items.forEach(it => {
+    if (!it.bot || it.bot.id === MASTER_BOT_ID) return;
+    if (!/:CLOSE_CONVERSATION$/.test(it.id || '')) return;
+    byBot[it.bot.id] = { botId: it.bot.id, botName: it.bot.name || it.bot.id, intentId: it.id };
+  });
+  closeIntentsByBot = Object.values(byBot);
+}
+
+// ── REFRESH (expensive: /sessions with events) ────────────────────────────────
+async function refreshData() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  showLoading(true, 'Consultando sesiones (esto consume cuota BI)…');
+  showError(null);
+  try {
+    const to = new Date();
+    const from = new Date();
+    from.setDate(from.getDate() - daysBack);
+
+    const sessions = await fetchSessionsForRange({
+      accessToken: token,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      onProgress: (msg) => setLoadingText(msg),
+    });
+
+    stuckChats = computeStuckInMasterbot(sessions);
+    renderList();
+    document.getElementById('last-updated').textContent =
+      `Actualizado: ${new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}`;
+  } catch (err) {
+    showError(`Error: ${err.message}`);
+  } finally {
+    showLoading(false);
+    btn.classList.remove('spinning');
+  }
+}
+
+async function fetchSessionsForRange({ accessToken, from, to, onProgress }) {
+  const allSessions = [];
+  const longTerm = daysBack > 1;
+  let url = new URL(`${API_BASE}/sessions`);
+  url.searchParams.set('from', from);
+  url.searchParams.set('to', to);
+  url.searchParams.set('include-events', 'true');
+  url.searchParams.set('include-open-sessions', 'true');
+  if (longTerm) url.searchParams.set('long-term-search', 'true');
+
+  let page = 0;
+  let nextUrl = url.toString();
+  while (nextUrl) {
+    const res = await fetch(nextUrl, { headers: { 'access-token': accessToken } });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status} en /sessions ${txt ? '- ' + txt : ''}`);
+    }
+    const data = await res.json();
+    const items = data.items || [];
+    allSessions.push(...items);
+    nextUrl = data.nextPage || null;
+    page++;
+    if (onProgress) onProgress(`Sesiones descargadas: ${allSessions.length} (página ${page})`);
+  }
+  return allSessions;
+}
+
+// ── CLASSIFY: which chats are currently sitting in masterbot, still open ─────
+function computeStuckInMasterbot(sessions) {
+  // Keep only the latest session per chatId
+  const latestByChat = {};
+  for (const s of sessions) {
+    const chatId = s.chat?.chat?.chatId;
+    if (!chatId) continue;
+    const cur = latestByChat[chatId];
+    if (!cur || new Date(s.creationTime) > new Date(cur.creationTime)) {
+      latestByChat[chatId] = s;
+    }
+  }
+
+  const result = [];
+  for (const chatId of Object.keys(latestByChat)) {
+    const session = latestByChat[chatId];
+    const events = (session.events || []).slice().sort(
+      (a, b) => new Date(a.creationTime) - new Date(b.creationTime)
+    );
+
+    let currentBotId = MASTER_BOT_ID; // every chat starts in masterbot before its first bot-change
+    let closed = false;
+    let lastEventTime = session.creationTime;
+
+    for (const ev of events) {
+      lastEventTime = ev.creationTime || lastEventTime;
+      if (ev.name === 'bot-change') {
+        currentBotId = ev.info?.currentBotId || currentBotId;
+        closed = false;
+      } else if (ev.name === 'conversation-close') {
+        closed = true;
+      } else if (ev.name === 'assigned-to-agent' || ev.name === 'unassigned-agent') {
+        // agent handling doesn't change bot ownership, no-op for our purposes
+      }
+    }
+
+    if (currentBotId === MASTER_BOT_ID && !closed) {
+      const chatInfo = session.chat || {};
+      const chatRef = chatInfo.chat || {};
+      result.push({
+        chatId,
+        channelId: chatRef.channelId || '',
+        contactId: chatRef.contactId || '',
+        firstName: chatInfo.firstName || '',
+        lastName: chatInfo.lastName || '',
+        lastEventTime,
+      });
+    }
+  }
+
+  result.sort((a, b) => new Date(a.lastEventTime) - new Date(b.lastEventTime)); // oldest waiting first
+  return result;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────────
+function renderList() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  document.getElementById('total-bar').innerHTML =
+    stuckChats.length > 0
+      ? `<strong>${stuckChats.length}</strong> conversación(es) atrapadas en masterbot sin cerrar`
+      : `Sin datos aún. Presiona <strong>Actualizar</strong> para consultar.`;
+
+  if (stuckChats.length === 0) {
+    list.innerHTML = `<div class="empty-state">✅ Nada pendiente en este rango (o aún no has presionado Actualizar).</div>`;
+    return;
+  }
+
+  stuckChats.forEach(chat => list.appendChild(buildRow(chat)));
+}
+
+function buildRow(chat) {
+  const name = [chat.firstName, chat.lastName].filter(Boolean).join(' ') || chat.contactId || 'Sin nombre';
+  const ts = timeSince(chat.lastEventTime);
+  const mappedBotId = channelBotMap[chat.channelId];
+  const target = closeIntentsByBot.find(b => b.botId === mappedBotId);
+
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.id = `row_${escId(chat.chatId)}`;
+
+  row.innerHTML = `
+    <div class="avatar">${escHtml(getInitials(chat.firstName, chat.lastName))}</div>
+    <div class="row-info">
+      <div class="row-name">${escHtml(name)}</div>
+      <div class="row-meta">
+        <span class="badge master">🔒 masterbot</span>
+        <span class="badge">${escHtml(chat.contactId || '')}</span>
+        <span class="badge" title="${escHtml(chat.channelId)}">${escHtml(getChannelLabel(chat.channelId))}</span>
+      </div>
+    </div>
+    <span class="row-time ${ts?.urgent ? 'urgent' : ''}">${ts ? ts.label + ' sin cierre' : ''}</span>
+    <div class="row-actions" id="actions_${escId(chat.chatId)}"></div>
+  `;
+
+  const actions = row.querySelector(`#actions_${escId(chat.chatId)}`);
+  if (target) {
+    const btn = document.createElement('button');
+    btn.className = 'btn-close';
+    btn.textContent = `Cerrar (→ ${target.botName})`;
+    btn.onclick = () => closeConversation(chat, target, row, btn);
+    actions.appendChild(btn);
+  } else {
+    const btn = document.createElement('button');
+    btn.className = 'btn-map';
+    btn.textContent = '⚠ Configurar bot →';
+    btn.onclick = openMapping;
+    actions.appendChild(btn);
+  }
+
+  return row;
+}
+
+async function closeConversation(chat, target, row, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Cerrando…';
+  row.classList.add('closing');
+  try {
+    const res = await fetch(`${API_BASE}/chats-actions/trigger-intent`, {
+      method: 'POST',
+      headers: { 'access-token': token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat: { chatId: chat.chatId },
+        intentIdOrName: target.intentId,
+        webhookPayload: 'masterbot-widget-force-close',
+      }),
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status} ${txt}`);
+    }
+    row.classList.remove('closing');
+    row.classList.add('done');
+    const actions = row.querySelector('.row-actions');
+    actions.innerHTML = '<span class="status-ok">✓ Intent disparado</span>';
+    stuckChats = stuckChats.filter(c => c.chatId !== chat.chatId);
+    setTimeout(() => {
+      row.remove();
+      renderTotalsOnly();
+    }, 1800);
+  } catch (err) {
+    row.classList.remove('closing');
+    row.classList.add('error');
+    const actions = row.querySelector('.row-actions');
+    actions.innerHTML = `<span class="status-err" title="${escHtml(err.message)}">✗ Error</span>`;
+    btn.disabled = false;
+  }
+}
+
+function renderTotalsOnly() {
+  document.getElementById('total-bar').innerHTML =
+    stuckChats.length > 0
+      ? `<strong>${stuckChats.length}</strong> conversación(es) atrapadas en masterbot sin cerrar`
+      : `Sin conversaciones pendientes en este rango.`;
+  if (stuckChats.length === 0 && document.getElementById('list').children.length === 0) {
+    document.getElementById('list').innerHTML = `<div class="empty-state">✅ Todo cerrado por ahora.</div>`;
+  }
+}
+
+// ── MAPPING MODAL ─────────────────────────────────────────────────────────────
+function openMapping() {
+  const body = document.getElementById('map-body');
+  body.innerHTML = '';
+
+  const channelIds = Object.keys(channelMap).sort();
+  if (channelIds.length === 0) {
+    body.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Carga la app primero (necesita /channels).</p>';
+  } else if (closeIntentsByBot.length === 0) {
+    body.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">No se encontraron bots con intent CLOSE_CONVERSATION en esta cuenta.</p>';
+  } else {
+    channelIds.forEach(cid => {
+      const row = document.createElement('div');
+      row.className = 'map-row';
+      const options = closeIntentsByBot.map(b =>
+        `<option value="${escHtml(b.botId)}" ${channelBotMap[cid] === b.botId ? 'selected' : ''}>${escHtml(b.botName)}</option>`
+      ).join('');
+      row.innerHTML = `
+        <div class="map-channel" title="${escHtml(cid)}">${escHtml(getChannelLabel(cid))}</div>
+        <select class="map-select" data-channel-id="${escHtml(cid)}">
+          <option value="">— sin asignar —</option>
+          ${options}
+        </select>
+      `;
+      body.appendChild(row);
+    });
+  }
+
+  document.getElementById('map-modal').classList.add('open');
+}
+
+function closeMapping() {
+  document.getElementById('map-modal').classList.remove('open');
+}
+
+function saveMapping() {
+  const selects = Array.from(document.querySelectorAll('.map-select'));
+  selects.forEach(sel => {
+    const cid = sel.dataset.channelId;
+    const val = sel.value;
+    if (val) channelBotMap[cid] = val;
+    else delete channelBotMap[cid];
+  });
+  try { localStorage.setItem(LS_MAP_KEY, JSON.stringify(channelBotMap)); } catch (e) {}
+  closeMapping();
+  renderList();
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+async function apiFetch(path) {
+  const res = await fetch(`${API_BASE}${path}`, { headers: { 'access-token': token } });
+  if (!res.ok) throw new Error(`HTTP ${res.status} en ${path}`);
+  return res.json();
+}
+
+function getChannelLabel(channelId) {
+  const ch = channelMap[channelId];
+  if (ch && ch.name && ch.name.trim()) return ch.name.trim();
+  if (ch && ch.number) return `+${ch.number}`;
+  return channelId || 'Canal desconocido';
+}
+
+function getInitials(first, last) {
+  const a = (first || '').trim()[0] || '';
+  const b = (last || '').trim()[0] || '';
+  return (a + b).toUpperCase() || '?';
+}
+
+function timeSince(dateStr) {
+  if (!dateStr) return null;
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60) return { label: `${diff}s`, urgent: false };
+  if (diff < 3600) { const m = Math.floor(diff / 60); return { label: `${m}m`, urgent: m > 30 }; }
+  if (diff < 86400) { const h = Math.floor(diff / 3600); return { label: `${h}h`, urgent: h > 4 }; }
+  return { label: `${Math.floor(diff / 86400)}d`, urgent: true };
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function escId(s) {
+  return String(s).replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function showLoading(show, text) {
+  document.getElementById('loading-overlay').classList.toggle('show', !!show);
+  if (text) setLoadingText(text);
+}
+function setLoadingText(t) { document.getElementById('loading-text').textContent = t; }
+function showError(msg) {
+  const bar = document.getElementById('error-bar');
+  bar.style.display = msg ? 'block' : 'none';
+  if (msg) bar.textContent = msg;
+}
+</script>
+</body>
+</html>
